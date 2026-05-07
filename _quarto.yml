@@ -1,24 +1,3 @@
-# project:
-#   type: website
-
-# website:
-#   description: "A blog built with Quarto"
-#   site-url: "https://dcliff36.github.io"
-#   title: "dat303-blog"
-#   navbar:
-#     right:
-#       - about.qmd
-#       - icon: github
-#         href: https://github.com/
-#       - icon: bluesky
-#         href: https://bsky.app/
-# format:
-#   html:
-#     theme:
-#       - cosmo
-#       - brand
-#     css: styles.css
-
 project:
   type: website
 
