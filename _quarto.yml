@@ -24,7 +24,7 @@ project:
 
 website:
   description: "A blog built with Quarto"
-  site-url: "https://github.io"
+  site-url: "https://dcliff36.github.io"
   title: "dat303-blog"
   navbar:
     right:
