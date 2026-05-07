@@ -1,0 +1,919 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>dat303-blog</title>
+<link>https://dcliff36.github.io/</link>
+<atom:link href="https://dcliff36.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<description>A blog built with Quarto</description>
+<generator>quarto-1.9.37</generator>
+<lastBuildDate>Wed, 06 May 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Interacting with the Google Gemini API from Python</title>
+  <link>https://dcliff36.github.io/posts/google-gemini-api/google-gemini-api.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="what-is-google-gemini" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-google-gemini">What is Google Gemini?</h2>
+<p>Google Gemini is Google’s AI assistant. You can talk to it from Python by sending it a prompt (a question or instruction) and it sends back a response. This post walks through everything you need to get started.</p>
+</section>
+<section id="step-1-create-a-google-account" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-create-a-google-account">Step 1 — Create a Google Account</h2>
+<p>If you have Gmail, you already have one. If not, go to <a href="https://accounts.google.com">accounts.google.com</a> and sign up.</p>
+</section>
+<section id="step-2-get-your-api-key" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-get-your-api-key">Step 2 — Get Your API Key</h2>
+<ol type="1">
+<li>Go to <a href="https://aistudio.google.com">aistudio.google.com</a></li>
+<li>Sign in and click <strong>“Get API Key”</strong> → <strong>“Create API Key”</strong></li>
+<li>Copy it and save it somewhere safe — treat it like a password</li>
+</ol>
+</section>
+<section id="step-3-store-your-key-safely" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-store-your-key-safely">Step 3 — Store Your Key Safely</h2>
+<p>Never paste your key directly in the notebook. In your terminal, run:</p>
+<div id="19a4249a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Run this in your terminal BEFORE opening the notebook (not as a code cell)</span></span>
+<span id="cb1-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Mac/Linux:  export GEMINI_API_KEY="your-key-here"</span></span>
+<span id="cb1-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Windows:    set GEMINI_API_KEY=your-key-here</span></span>
+<span id="cb1-4"></span>
+<span id="cb1-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Install the library</span></span>
+<span id="cb1-6"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>pip install google<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>generativeai</span></code></pre></div></div>
+</div>
+</section>
+<section id="step-4-connect-to-gemini" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-connect-to-gemini">Step 4 — Connect to Gemini</h2>
+<div id="a82c0060" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> os</span>
+<span id="cb2-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> google.generativeai <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> genai</span>
+<span id="cb2-3"></span>
+<span id="cb2-4">genai.configure(api_key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>os.environ[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"GEMINI_API_KEY"</span>])</span>
+<span id="cb2-5">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> genai.GenerativeModel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-1.5-flash"</span>)</span>
+<span id="cb2-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Connected successfully!"</span>)</span></code></pre></div></div>
+</div>
+</section>
+<section id="step-5-send-prompts" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-send-prompts">Step 5 — Send Prompts</h2>
+<p>Now we can send questions to Gemini and print the responses.</p>
+<div id="c1aa76ba" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Basic question</span></span>
+<span id="cb3-2">response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.generate_content(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"What is machine learning? Explain in 3 sentences."</span>)</span>
+<span id="cb3-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--- Basic Question ---"</span>)</span>
+<span id="cb3-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(response.text)</span>
+<span id="cb3-5"></span>
+<span id="cb3-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Ask it to write code</span></span>
+<span id="cb3-7">response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.generate_content(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Write a Python function that calculates the mean of a list."</span>)</span>
+<span id="cb3-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--- Code Generation ---"</span>)</span>
+<span id="cb3-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(response.text)</span>
+<span id="cb3-10"></span>
+<span id="cb3-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Summarize text</span></span>
+<span id="cb3-12">text <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Pandas is a Python library for data manipulation. It provides DataFrames for working with tabular data and integrates well with NumPy and Matplotlib."</span></span>
+<span id="cb3-13">response <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.generate_content(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Summarize this in one sentence: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>text<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb3-14"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--- Summarization ---"</span>)</span>
+<span id="cb3-15"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(response.text)</span></code></pre></div></div>
+</div>
+</section>
+<section id="step-6-multi-turn-conversation" class="level2">
+<h2 class="anchored" data-anchor-id="step-6-multi-turn-conversation">Step 6 — Multi-Turn Conversation</h2>
+<p>Gemini can also hold a conversation where it remembers previous messages.</p>
+<div id="5960aea1" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">chat <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.start_chat(history<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[])</span>
+<span id="cb4-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Turn 1:"</span>, chat.send_message(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"I'm learning Python for data science. Where should I start?"</span>).text)</span>
+<span id="cb4-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Turn 2:"</span>, chat.send_message(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"What should I learn after Pandas?"</span>).text)</span></code></pre></div></div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>In this post we: - Created a Google account and obtained a Gemini API key from AI Studio - Installed <code>google-generativeai</code> and connected to the model safely using an environment variable - Sent basic questions, generated code, summarized text, and held a multi-turn conversation</p>
+<p>The free tier is generous — it’s a great tool to experiment with in your data science work.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Python</category>
+  <category>AI</category>
+  <guid>https://dcliff36.github.io/posts/google-gemini-api/google-gemini-api.html</guid>
+  <pubDate>Wed, 06 May 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Polars: A Faster Alternative to Pandas</title>
+  <link>https://dcliff36.github.io/posts/polars/polars.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="what-is-polars" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-polars">What is Polars?</h2>
+<p>Polars is a DataFrame library — like Pandas, but much faster. It’s written in Rust and uses all your CPU cores automatically. It’s quickly becoming the standard for tabular data work in Python, especially on larger datasets.</p>
+<p>Key advantages over Pandas: - 5–10x faster on large datasets - Uses all CPU cores automatically - Lazy evaluation — optimizes operations before running them - Cleaner, more consistent syntax</p>
+<div id="5f6a1cdf" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>pip install polars</span></code></pre></div></div>
+</div>
+</section>
+<section id="creating-and-exploring-dataframes" class="level2">
+<h2 class="anchored" data-anchor-id="creating-and-exploring-dataframes">Creating and Exploring DataFrames</h2>
+<p>Polars DataFrames look similar to Pandas but use <code>pl.col()</code> for column references instead of <code>df["column"]</code>.</p>
+<div id="3598cc64" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pl</span>
+<span id="cb2-2"></span>
+<span id="cb2-3">df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.DataFrame({</span>
+<span id="cb2-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"name"</span>: [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Alice"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Bob"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Charlie"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Diana"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Eve"</span>],</span>
+<span id="cb2-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"age"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">30</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">35</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">28</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">22</span>],</span>
+<span id="cb2-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"salary"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">70000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">85000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">92000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">78000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">65000</span>],</span>
+<span id="cb2-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"department"</span>: [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Engineering"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Marketing"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Engineering"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"HR"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Engineering"</span>]</span>
+<span id="cb2-8">})</span>
+<span id="cb2-9"></span>
+<span id="cb2-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(df)</span>
+<span id="cb2-11"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Shape:"</span>, df.shape)</span>
+<span id="cb2-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Schema:"</span>, df.schema)</span></code></pre></div></div>
+</div>
+</section>
+<section id="filtering-adding-columns-and-grouping" class="level2">
+<h2 class="anchored" data-anchor-id="filtering-adding-columns-and-grouping">Filtering, Adding Columns, and Grouping</h2>
+<div id="ae62274c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Filter rows</span></span>
+<span id="cb3-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--- Engineers earning over $75,000 ---"</span>)</span>
+<span id="cb3-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(df.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">filter</span>((pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"department"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Engineering"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> (pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"salary"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">75000</span>)))</span>
+<span id="cb3-4"></span>
+<span id="cb3-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Add a new column</span></span>
+<span id="cb3-6">df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> df.with_columns((pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"salary"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.10</span>).alias(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"salary_with_raise"</span>))</span>
+<span id="cb3-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">--- With 10</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">% r</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">aise ---"</span>)</span>
+<span id="cb3-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(df)</span>
+<span id="cb3-9"></span>
+<span id="cb3-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Group and aggregate</span></span>
+<span id="cb3-11"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">--- Average salary by department ---"</span>)</span>
+<span id="cb3-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(df.group_by(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"department"</span>).agg([</span>
+<span id="cb3-13">    pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"salary"</span>).mean().alias(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"avg_salary"</span>),</span>
+<span id="cb3-14">    pl.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>().alias(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"headcount"</span>)</span>
+<span id="cb3-15">]).sort(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"avg_salary"</span>, descending<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>))</span></code></pre></div></div>
+</div>
+</section>
+<section id="lazy-evaluation-polars-best-feature" class="level2">
+<h2 class="anchored" data-anchor-id="lazy-evaluation-polars-best-feature">Lazy Evaluation — Polars’ Best Feature</h2>
+<p>Lazy mode builds an optimized query plan before running anything. This saves memory and speeds up complex pipelines significantly.</p>
+<div id="ff38be3a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">result <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (</span>
+<span id="cb4-2">    df.lazy()</span>
+<span id="cb4-3">    .<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">filter</span>(pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"salary"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">70000</span>)</span>
+<span id="cb4-4">    .group_by(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"department"</span>)</span>
+<span id="cb4-5">    .agg(pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"salary"</span>).mean().alias(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"avg_salary"</span>))</span>
+<span id="cb4-6">    .sort(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"avg_salary"</span>, descending<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb4-7">    .collect()  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># execute the plan</span></span>
+<span id="cb4-8">)</span>
+<span id="cb4-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(result)</span></code></pre></div></div>
+</div>
+</section>
+<section id="polars-vs.-pandas" class="level2">
+<h2 class="anchored" data-anchor-id="polars-vs.-pandas">Polars vs.&nbsp;Pandas</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Pandas</th>
+<th>Polars</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Speed</td>
+<td>Moderate</td>
+<td>Much faster</td>
+</tr>
+<tr class="even">
+<td>Multi-core</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Lazy execution</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Syntax</td>
+<td><code>df["col"]</code></td>
+<td><code>pl.col("col")</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>In this post we covered creating DataFrames, filtering rows, adding columns, grouping and aggregating, and using lazy mode. Polars is the most impactful library to add to your data science toolkit right now — the performance gains on real datasets are immediately noticeable.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Python</category>
+  <category>Data Science</category>
+  <guid>https://dcliff36.github.io/posts/polars/polars.html</guid>
+  <pubDate>Wed, 06 May 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Building a Simple RAG System in Python</title>
+  <link>https://dcliff36.github.io/posts/rag/rag.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="what-is-rag" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-rag">What is RAG?</h2>
+<p>Large language models like Gemini know a lot — but they don’t know <em>your</em> data. <strong>Retrieval-Augmented Generation (RAG)</strong> fixes this by finding relevant passages from your own documents and handing them to the model before it answers. Instead of guessing, the model reads the right content first.</p>
+<p>The process has three steps: 1. <strong>Embed</strong> your documents — convert each one into a list of numbers representing its meaning 2. <strong>Retrieve</strong> — when a question is asked, find the documents closest in meaning to that question 3. <strong>Generate</strong> — send those documents + the question to the LLM and let it answer</p>
+</section>
+<section id="install-required-libraries" class="level2">
+<h2 class="anchored" data-anchor-id="install-required-libraries">Install Required Libraries</h2>
+<div id="44e1bc93" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>pip install google<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>generativeai numpy scikit<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>learn</span></code></pre></div></div>
+</div>
+</section>
+<section id="setup-and-document-library" class="level2">
+<h2 class="anchored" data-anchor-id="setup-and-document-library">Setup and Document Library</h2>
+<p>We’ll use a small set of data science descriptions as our “documents.” In a real system these would be loaded from files or a database.</p>
+<div id="3c73b45b" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> os</span>
+<span id="cb2-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb2-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> google.generativeai <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> genai</span>
+<span id="cb2-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.metrics.pairwise <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> cosine_similarity</span>
+<span id="cb2-5"></span>
+<span id="cb2-6">genai.configure(api_key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>os.environ[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"GEMINI_API_KEY"</span>])</span>
+<span id="cb2-7">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> genai.GenerativeModel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gemini-1.5-flash"</span>)</span>
+<span id="cb2-8"></span>
+<span id="cb2-9">documents <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb2-10">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Pandas is a Python library for data manipulation. It provides DataFrames for working with tabular data."</span>,</span>
+<span id="cb2-11">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"NumPy is the foundation of scientific computing in Python. It provides fast array operations."</span>,</span>
+<span id="cb2-12">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Scikit-learn is a machine learning library for Python with tools for classification, regression, and clustering."</span>,</span>
+<span id="cb2-13">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Matplotlib is a plotting library for Python used to create charts, graphs, and visualizations."</span>,</span>
+<span id="cb2-14">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"PyTorch is a deep learning framework developed by Meta, widely used for building neural networks."</span>,</span>
+<span id="cb2-15">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Polars is a fast DataFrame library written in Rust. It is often used as a high-performance alternative to Pandas."</span>,</span>
+<span id="cb2-16">]</span>
+<span id="cb2-17"></span>
+<span id="cb2-18"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(documents)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> documents loaded."</span>)</span></code></pre></div></div>
+</div>
+</section>
+<section id="step-1-embed-the-documents" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-embed-the-documents">Step 1 — Embed the Documents</h2>
+<p>An <strong>embedding</strong> converts text into a list of numbers that captures its meaning. Similar texts produce similar numbers. We embed all documents once and store the results.</p>
+<div id="375cd4d3" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> embed(text):</span>
+<span id="cb3-2">    result <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> genai.embed_content(model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"models/text-embedding-004"</span>, content<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>text)</span>
+<span id="cb3-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.array(result[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"embedding"</span>])</span>
+<span id="cb3-4"></span>
+<span id="cb3-5">doc_embeddings <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([embed(doc) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> doc <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> documents])</span>
+<span id="cb3-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Embedded </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(documents)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> documents. Each has </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>doc_embeddings<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> dimensions."</span>)</span></code></pre></div></div>
+</div>
+</section>
+<section id="step-2-retrieve-relevant-documents" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-retrieve-relevant-documents">Step 2 — Retrieve Relevant Documents</h2>
+<p>When a question comes in, we embed it the same way and use <strong>cosine similarity</strong> to find which documents are closest in meaning.</p>
+<div id="b94812dc" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> retrieve(question, top_k<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>):</span>
+<span id="cb4-2">    q_embedding <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> embed(question).reshape(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb4-3">    scores <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> cosine_similarity(q_embedding, doc_embeddings)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb4-4">    top_indices <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.argsort(scores)[::<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>][:top_k]</span>
+<span id="cb4-5">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> [documents[i] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> top_indices]</span>
+<span id="cb4-6"></span>
+<span id="cb4-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Test retrieval</span></span>
+<span id="cb4-8">question <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"What library should I use to make charts?"</span></span>
+<span id="cb4-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Question:"</span>, question)</span>
+<span id="cb4-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Retrieved documents:"</span>)</span>
+<span id="cb4-11"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> doc <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> retrieve(question):</span>
+<span id="cb4-12">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"  - </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>doc<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+</div>
+</section>
+<section id="step-3-generate-an-answer" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-generate-an-answer">Step 3 — Generate an Answer</h2>
+<p>We combine the retrieved documents with the question into a single prompt and send it to Gemini. The model is instructed to only use the provided context.</p>
+<div id="f17078cb" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> ask(question):</span>
+<span id="cb5-2">    context <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>.join(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"- </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>doc<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> doc <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> retrieve(question))</span>
+<span id="cb5-3">    prompt <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"""Answer the question using only the context below.</span></span>
+<span id="cb5-4"><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">If the answer isn't in the context, say "I don't have that information."</span></span>
+<span id="cb5-5"></span>
+<span id="cb5-6"><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Context:</span></span>
+<span id="cb5-7"><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>context<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb5-8"></span>
+<span id="cb5-9"><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Question: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>question<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb5-10">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> model.generate_content(prompt).text</span>
+<span id="cb5-11"></span>
+<span id="cb5-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Q: What library should I use to make charts?"</span>)</span>
+<span id="cb5-13"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"A:"</span>, ask(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"What library should I use to make charts?"</span>))</span>
+<span id="cb5-14"></span>
+<span id="cb5-15"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Q: What is PyTorch used for?"</span>)</span>
+<span id="cb5-16"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"A:"</span>, ask(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"What is PyTorch used for?"</span>))</span>
+<span id="cb5-17"></span>
+<span id="cb5-18"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Q: How do I book a flight?"</span>)</span>
+<span id="cb5-19"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"A:"</span>, ask(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"How do I book a flight?"</span>))  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Should say it doesn't know</span></span></code></pre></div></div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>In this post we built a working RAG system from scratch: - <strong>Embedded</strong> a set of documents using Gemini’s embedding model - <strong>Retrieved</strong> the most relevant documents for any given question using cosine similarity - <strong>Generated</strong> grounded answers by passing retrieved context to Gemini</p>
+<p>The last example — asking about booking a flight — shows why RAG is reliable: the model correctly says it doesn’t have that information rather than making something up. Real-world RAG systems use vector databases like Pinecone or ChromaDB to scale this to millions of documents, but the core pipeline is exactly what you built here.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Python</category>
+  <category>AI</category>
+  <guid>https://dcliff36.github.io/posts/rag/rag.html</guid>
+  <pubDate>Wed, 06 May 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Post With Code</title>
+  <dc:creator>Harlow Malloc</dc:creator>
+  <link>https://dcliff36.github.io/posts/post-with-code/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This is a post with executable code.</p>
+
+
+
+ ]]></description>
+  <category>news</category>
+  <category>code</category>
+  <category>analysis</category>
+  <guid>https://dcliff36.github.io/posts/post-with-code/</guid>
+  <pubDate>Sun, 26 Apr 2026 05:00:00 GMT</pubDate>
+  <media:content url="https://dcliff36.github.io/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
+</item>
+<item>
+  <title>Solving the Normal Equations</title>
+  <link>https://dcliff36.github.io/posts/solving-normal-equations/Solving-normal-equations.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+
+
+ ]]></description>
+  <category>Python</category>
+  <guid>https://dcliff36.github.io/posts/solving-normal-equations/Solving-normal-equations.html</guid>
+  <pubDate>Sun, 26 Apr 2026 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Welcome To My Blog</title>
+  <dc:creator>Tristan O&#39;Malley</dc:creator>
+  <link>https://dcliff36.github.io/posts/welcome/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This is the first post in a Quarto blog. Welcome!</p>
+<p><img src="https://dcliff36.github.io/posts/welcome/thumbnail.jpg" class="img-fluid"></p>
+<p>Since this post doesn’t specify an explicit <code>image</code>, the first image in the post will be used in the listing page of posts.</p>
+
+
+
+ ]]></description>
+  <category>news</category>
+  <guid>https://dcliff36.github.io/posts/welcome/</guid>
+  <pubDate>Thu, 23 Apr 2026 05:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

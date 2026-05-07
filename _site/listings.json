@@ -1,0 +1,13 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/google-gemini-api/google-gemini-api.html",
+      "/posts/polars/polars.html",
+      "/posts/rag/rag.html",
+      "/posts/post-with-code/index.html",
+      "/posts/solving-normal-equations/Solving-normal-equations.html",
+      "/posts/welcome/index.html"
+    ]
+  }
+]

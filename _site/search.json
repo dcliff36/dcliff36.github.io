@@ -1,0 +1,198 @@
+[
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "posts/rag/rag.html",
+    "href": "posts/rag/rag.html",
+    "title": "Building a Simple RAG System in Python",
+    "section": "",
+    "text": "Large language models like Gemini know a lot — but they don’t know your data. Retrieval-Augmented Generation (RAG) fixes this by finding relevant passages from your own documents and handing them to the model before it answers. Instead of guessing, the model reads the right content first.\nThe process has three steps: 1. Embed your documents — convert each one into a list of numbers representing its meaning 2. Retrieve — when a question is asked, find the documents closest in meaning to that question 3. Generate — send those documents + the question to the LLM and let it answer"
+  },
+  {
+    "objectID": "posts/rag/rag.html#what-is-rag",
+    "href": "posts/rag/rag.html#what-is-rag",
+    "title": "Building a Simple RAG System in Python",
+    "section": "",
+    "text": "Large language models like Gemini know a lot — but they don’t know your data. Retrieval-Augmented Generation (RAG) fixes this by finding relevant passages from your own documents and handing them to the model before it answers. Instead of guessing, the model reads the right content first.\nThe process has three steps: 1. Embed your documents — convert each one into a list of numbers representing its meaning 2. Retrieve — when a question is asked, find the documents closest in meaning to that question 3. Generate — send those documents + the question to the LLM and let it answer"
+  },
+  {
+    "objectID": "posts/rag/rag.html#install-required-libraries",
+    "href": "posts/rag/rag.html#install-required-libraries",
+    "title": "Building a Simple RAG System in Python",
+    "section": "Install Required Libraries",
+    "text": "Install Required Libraries\n\n!pip install google-generativeai numpy scikit-learn"
+  },
+  {
+    "objectID": "posts/rag/rag.html#setup-and-document-library",
+    "href": "posts/rag/rag.html#setup-and-document-library",
+    "title": "Building a Simple RAG System in Python",
+    "section": "Setup and Document Library",
+    "text": "Setup and Document Library\nWe’ll use a small set of data science descriptions as our “documents.” In a real system these would be loaded from files or a database.\n\nimport os\nimport numpy as np\nimport google.generativeai as genai\nfrom sklearn.metrics.pairwise import cosine_similarity\n\ngenai.configure(api_key=os.environ[\"GEMINI_API_KEY\"])\nmodel = genai.GenerativeModel(\"gemini-1.5-flash\")\n\ndocuments = [\n    \"Pandas is a Python library for data manipulation. It provides DataFrames for working with tabular data.\",\n    \"NumPy is the foundation of scientific computing in Python. It provides fast array operations.\",\n    \"Scikit-learn is a machine learning library for Python with tools for classification, regression, and clustering.\",\n    \"Matplotlib is a plotting library for Python used to create charts, graphs, and visualizations.\",\n    \"PyTorch is a deep learning framework developed by Meta, widely used for building neural networks.\",\n    \"Polars is a fast DataFrame library written in Rust. It is often used as a high-performance alternative to Pandas.\",\n]\n\nprint(f\"{len(documents)} documents loaded.\")"
+  },
+  {
+    "objectID": "posts/rag/rag.html#step-1-embed-the-documents",
+    "href": "posts/rag/rag.html#step-1-embed-the-documents",
+    "title": "Building a Simple RAG System in Python",
+    "section": "Step 1 — Embed the Documents",
+    "text": "Step 1 — Embed the Documents\nAn embedding converts text into a list of numbers that captures its meaning. Similar texts produce similar numbers. We embed all documents once and store the results.\n\ndef embed(text):\n    result = genai.embed_content(model=\"models/text-embedding-004\", content=text)\n    return np.array(result[\"embedding\"])\n\ndoc_embeddings = np.array([embed(doc) for doc in documents])\nprint(f\"Embedded {len(documents)} documents. Each has {doc_embeddings.shape[1]} dimensions.\")"
+  },
+  {
+    "objectID": "posts/rag/rag.html#step-2-retrieve-relevant-documents",
+    "href": "posts/rag/rag.html#step-2-retrieve-relevant-documents",
+    "title": "Building a Simple RAG System in Python",
+    "section": "Step 2 — Retrieve Relevant Documents",
+    "text": "Step 2 — Retrieve Relevant Documents\nWhen a question comes in, we embed it the same way and use cosine similarity to find which documents are closest in meaning.\n\ndef retrieve(question, top_k=2):\n    q_embedding = embed(question).reshape(1, -1)\n    scores = cosine_similarity(q_embedding, doc_embeddings)[0]\n    top_indices = np.argsort(scores)[::-1][:top_k]\n    return [documents[i] for i in top_indices]\n\n# Test retrieval\nquestion = \"What library should I use to make charts?\"\nprint(\"Question:\", question)\nprint(\"Retrieved documents:\")\nfor doc in retrieve(question):\n    print(f\"  - {doc}\")"
+  },
+  {
+    "objectID": "posts/rag/rag.html#step-3-generate-an-answer",
+    "href": "posts/rag/rag.html#step-3-generate-an-answer",
+    "title": "Building a Simple RAG System in Python",
+    "section": "Step 3 — Generate an Answer",
+    "text": "Step 3 — Generate an Answer\nWe combine the retrieved documents with the question into a single prompt and send it to Gemini. The model is instructed to only use the provided context.\n\ndef ask(question):\n    context = \"\\n\".join(f\"- {doc}\" for doc in retrieve(question))\n    prompt = f\"\"\"Answer the question using only the context below.\nIf the answer isn't in the context, say \"I don't have that information.\"\n\nContext:\n{context}\n\nQuestion: {question}\"\"\"\n    return model.generate_content(prompt).text\n\nprint(\"Q: What library should I use to make charts?\")\nprint(\"A:\", ask(\"What library should I use to make charts?\"))\n\nprint(\"\\nQ: What is PyTorch used for?\")\nprint(\"A:\", ask(\"What is PyTorch used for?\"))\n\nprint(\"\\nQ: How do I book a flight?\")\nprint(\"A:\", ask(\"How do I book a flight?\"))  # Should say it doesn't know"
+  },
+  {
+    "objectID": "posts/rag/rag.html#summary",
+    "href": "posts/rag/rag.html#summary",
+    "title": "Building a Simple RAG System in Python",
+    "section": "Summary",
+    "text": "Summary\nIn this post we built a working RAG system from scratch: - Embedded a set of documents using Gemini’s embedding model - Retrieved the most relevant documents for any given question using cosine similarity - Generated grounded answers by passing retrieved context to Gemini\nThe last example — asking about booking a flight — shows why RAG is reliable: the model correctly says it doesn’t have that information rather than making something up. Real-world RAG systems use vector databases like Pinecone or ChromaDB to scale this to millions of documents, but the core pipeline is exactly what you built here."
+  },
+  {
+    "objectID": "posts/polars/polars.html",
+    "href": "posts/polars/polars.html",
+    "title": "Polars: A Faster Alternative to Pandas",
+    "section": "",
+    "text": "Polars is a DataFrame library — like Pandas, but much faster. It’s written in Rust and uses all your CPU cores automatically. It’s quickly becoming the standard for tabular data work in Python, especially on larger datasets.\nKey advantages over Pandas: - 5–10x faster on large datasets - Uses all CPU cores automatically - Lazy evaluation — optimizes operations before running them - Cleaner, more consistent syntax\n\n!pip install polars"
+  },
+  {
+    "objectID": "posts/polars/polars.html#what-is-polars",
+    "href": "posts/polars/polars.html#what-is-polars",
+    "title": "Polars: A Faster Alternative to Pandas",
+    "section": "",
+    "text": "Polars is a DataFrame library — like Pandas, but much faster. It’s written in Rust and uses all your CPU cores automatically. It’s quickly becoming the standard for tabular data work in Python, especially on larger datasets.\nKey advantages over Pandas: - 5–10x faster on large datasets - Uses all CPU cores automatically - Lazy evaluation — optimizes operations before running them - Cleaner, more consistent syntax\n\n!pip install polars"
+  },
+  {
+    "objectID": "posts/polars/polars.html#creating-and-exploring-dataframes",
+    "href": "posts/polars/polars.html#creating-and-exploring-dataframes",
+    "title": "Polars: A Faster Alternative to Pandas",
+    "section": "Creating and Exploring DataFrames",
+    "text": "Creating and Exploring DataFrames\nPolars DataFrames look similar to Pandas but use pl.col() for column references instead of df[\"column\"].\n\nimport polars as pl\n\ndf = pl.DataFrame({\n    \"name\": [\"Alice\", \"Bob\", \"Charlie\", \"Diana\", \"Eve\"],\n    \"age\": [25, 30, 35, 28, 22],\n    \"salary\": [70000, 85000, 92000, 78000, 65000],\n    \"department\": [\"Engineering\", \"Marketing\", \"Engineering\", \"HR\", \"Engineering\"]\n})\n\nprint(df)\nprint(\"\\nShape:\", df.shape)\nprint(\"\\nSchema:\", df.schema)"
+  },
+  {
+    "objectID": "posts/polars/polars.html#filtering-adding-columns-and-grouping",
+    "href": "posts/polars/polars.html#filtering-adding-columns-and-grouping",
+    "title": "Polars: A Faster Alternative to Pandas",
+    "section": "Filtering, Adding Columns, and Grouping",
+    "text": "Filtering, Adding Columns, and Grouping\n\n# Filter rows\nprint(\"--- Engineers earning over $75,000 ---\")\nprint(df.filter((pl.col(\"department\") == \"Engineering\") & (pl.col(\"salary\") &gt; 75000)))\n\n# Add a new column\ndf = df.with_columns((pl.col(\"salary\") * 1.10).alias(\"salary_with_raise\"))\nprint(\"\\n--- With 10% raise ---\")\nprint(df)\n\n# Group and aggregate\nprint(\"\\n--- Average salary by department ---\")\nprint(df.group_by(\"department\").agg([\n    pl.col(\"salary\").mean().alias(\"avg_salary\"),\n    pl.len().alias(\"headcount\")\n]).sort(\"avg_salary\", descending=True))"
+  },
+  {
+    "objectID": "posts/polars/polars.html#lazy-evaluation-polars-best-feature",
+    "href": "posts/polars/polars.html#lazy-evaluation-polars-best-feature",
+    "title": "Polars: A Faster Alternative to Pandas",
+    "section": "Lazy Evaluation — Polars’ Best Feature",
+    "text": "Lazy Evaluation — Polars’ Best Feature\nLazy mode builds an optimized query plan before running anything. This saves memory and speeds up complex pipelines significantly.\n\nresult = (\n    df.lazy()\n    .filter(pl.col(\"salary\") &gt; 70000)\n    .group_by(\"department\")\n    .agg(pl.col(\"salary\").mean().alias(\"avg_salary\"))\n    .sort(\"avg_salary\", descending=True)\n    .collect()  # execute the plan\n)\nprint(result)"
+  },
+  {
+    "objectID": "posts/polars/polars.html#polars-vs.-pandas",
+    "href": "posts/polars/polars.html#polars-vs.-pandas",
+    "title": "Polars: A Faster Alternative to Pandas",
+    "section": "Polars vs. Pandas",
+    "text": "Polars vs. Pandas\n\n\n\n\nPandas\nPolars\n\n\n\n\nSpeed\nModerate\nMuch faster\n\n\nMulti-core\nNo\nYes\n\n\nLazy execution\nNo\nYes\n\n\nSyntax\ndf[\"col\"]\npl.col(\"col\")"
+  },
+  {
+    "objectID": "posts/polars/polars.html#summary",
+    "href": "posts/polars/polars.html#summary",
+    "title": "Polars: A Faster Alternative to Pandas",
+    "section": "Summary",
+    "text": "Summary\nIn this post we covered creating DataFrames, filtering rows, adding columns, grouping and aggregating, and using lazy mode. Polars is the most impactful library to add to your data science toolkit right now — the performance gains on real datasets are immediately noticeable."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "dat303-blog",
+    "section": "",
+    "text": "Interacting with the Google Gemini API from Python\n\n\n\nPython\n\nAI\n\n\n\nHow to set up a Google account, get an API key, and query Gemini from Python.\n\n\n\n\n\nMay 6, 2026\n\n\n\n\n\n\n\n\n\n\n\n\nPolars: A Faster Alternative to Pandas\n\n\n\nPython\n\nData Science\n\n\n\nAn introduction to Polars, a modern DataFrame library that is faster and cleaner than Pandas.\n\n\n\n\n\nMay 6, 2026\n\n\n\n\n\n\n\n\n\n\n\n\nBuilding a Simple RAG System in Python\n\n\n\nPython\n\nAI\n\n\n\nLearn how Retrieval-Augmented Generation works and build a simple version that lets an AI answer questions about your own documents.\n\n\n\n\n\nMay 6, 2026\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\n\n\nApr 26, 2026\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nSolving the Normal Equations\n\n\n\nPython\n\n\n\nAn investigation into solving the normal equations with Python\n\n\n\n\n\nApr 26, 2026\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nApr 23, 2026\n\n\nTristan O’Malley\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog"
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html",
+    "href": "posts/google-gemini-api/google-gemini-api.html",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "",
+    "text": "Google Gemini is Google’s AI assistant. You can talk to it from Python by sending it a prompt (a question or instruction) and it sends back a response. This post walks through everything you need to get started."
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#what-is-google-gemini",
+    "href": "posts/google-gemini-api/google-gemini-api.html#what-is-google-gemini",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "",
+    "text": "Google Gemini is Google’s AI assistant. You can talk to it from Python by sending it a prompt (a question or instruction) and it sends back a response. This post walks through everything you need to get started."
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#step-1-create-a-google-account",
+    "href": "posts/google-gemini-api/google-gemini-api.html#step-1-create-a-google-account",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "Step 1 — Create a Google Account",
+    "text": "Step 1 — Create a Google Account\nIf you have Gmail, you already have one. If not, go to accounts.google.com and sign up."
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#step-2-get-your-api-key",
+    "href": "posts/google-gemini-api/google-gemini-api.html#step-2-get-your-api-key",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "Step 2 — Get Your API Key",
+    "text": "Step 2 — Get Your API Key\n\nGo to aistudio.google.com\nSign in and click “Get API Key” → “Create API Key”\nCopy it and save it somewhere safe — treat it like a password"
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#step-3-store-your-key-safely",
+    "href": "posts/google-gemini-api/google-gemini-api.html#step-3-store-your-key-safely",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "Step 3 — Store Your Key Safely",
+    "text": "Step 3 — Store Your Key Safely\nNever paste your key directly in the notebook. In your terminal, run:\n\n# Run this in your terminal BEFORE opening the notebook (not as a code cell)\n# Mac/Linux:  export GEMINI_API_KEY=\"your-key-here\"\n# Windows:    set GEMINI_API_KEY=your-key-here\n\n# Install the library\n!pip install google-generativeai"
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#step-4-connect-to-gemini",
+    "href": "posts/google-gemini-api/google-gemini-api.html#step-4-connect-to-gemini",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "Step 4 — Connect to Gemini",
+    "text": "Step 4 — Connect to Gemini\n\nimport os\nimport google.generativeai as genai\n\ngenai.configure(api_key=os.environ[\"GEMINI_API_KEY\"])\nmodel = genai.GenerativeModel(\"gemini-1.5-flash\")\nprint(\"Connected successfully!\")"
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#step-5-send-prompts",
+    "href": "posts/google-gemini-api/google-gemini-api.html#step-5-send-prompts",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "Step 5 — Send Prompts",
+    "text": "Step 5 — Send Prompts\nNow we can send questions to Gemini and print the responses.\n\n# Basic question\nresponse = model.generate_content(\"What is machine learning? Explain in 3 sentences.\")\nprint(\"--- Basic Question ---\")\nprint(response.text)\n\n# Ask it to write code\nresponse = model.generate_content(\"Write a Python function that calculates the mean of a list.\")\nprint(\"--- Code Generation ---\")\nprint(response.text)\n\n# Summarize text\ntext = \"Pandas is a Python library for data manipulation. It provides DataFrames for working with tabular data and integrates well with NumPy and Matplotlib.\"\nresponse = model.generate_content(f\"Summarize this in one sentence: {text}\")\nprint(\"--- Summarization ---\")\nprint(response.text)"
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#step-6-multi-turn-conversation",
+    "href": "posts/google-gemini-api/google-gemini-api.html#step-6-multi-turn-conversation",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "Step 6 — Multi-Turn Conversation",
+    "text": "Step 6 — Multi-Turn Conversation\nGemini can also hold a conversation where it remembers previous messages.\n\nchat = model.start_chat(history=[])\nprint(\"Turn 1:\", chat.send_message(\"I'm learning Python for data science. Where should I start?\").text)\nprint(\"Turn 2:\", chat.send_message(\"What should I learn after Pandas?\").text)"
+  },
+  {
+    "objectID": "posts/google-gemini-api/google-gemini-api.html#summary",
+    "href": "posts/google-gemini-api/google-gemini-api.html#summary",
+    "title": "Interacting with the Google Gemini API from Python",
+    "section": "Summary",
+    "text": "Summary\nIn this post we: - Created a Google account and obtained a Gemini API key from AI Studio - Installed google-generativeai and connected to the model safely using an environment variable - Sent basic questions, generated code, summarized text, and held a multi-turn conversation\nThe free tier is generous — it’s a great tool to experiment with in your data science work."
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Post With Code",
+    "section": "",
+    "text": "This is a post with executable code."
+  }
+]
